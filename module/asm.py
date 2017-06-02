@@ -38,16 +38,41 @@ class Code:
 
         self.obj_code = op_table.op_to_code[self.op]
 
-        if self.obj_code is None
+        if self.obj_code is None:
             raise Exception('op: ' + self.op + ' not found!')
         if self.op == 'BYTE':
             if self.arg.split('')[0] == 'C':
                 str = arg[2:-1]
                 self.code_size = len(str)
+                self.obj_code = ''
 
                 for si in range(0, len(str) - 1, 1):
                     ch = str.split('')[si]
-                    ch_int = int(ch)
+                    self.obj_code += '{%02X}'.format(ch)
+
+                self.obj_code = self.obj_code.upper()
+
+            elif self.arg.split('')[0] == 'X':
+                str = arg[2:-1]
+                self.obj_code = str
+                self.code_size = len(str) / 2
+
+            else:
+                self.code_size = -1
+
+        elif self.op == 'WORD':
+            self.code_size = 3
+            self.obj_code = '{%06X}'.format(self.arg)
+
+        elif self.op == 'RESB':
+            self.code_size = int(self.arg)
+
+        elif self.op == 'RESW':
+            self.code_sixe = int(self.arg) * 3
+
+        elif self.op == 'START':
+            self.offset = 
+
 
 
 class Assembler:
@@ -59,4 +84,3 @@ class Assembler:
 
 
 if __name__ == '__main__':
-
