@@ -71,9 +71,18 @@ class Code:
             self.code_sixe = int(self.arg) * 3
 
         elif self.op == 'START':
-            self.offset = 
+            self.offset = hex(int(self.arg, 16) + 0x200)[2:]
 
+        elif self.op == 'END':
+            self.code_size = 0
 
+        else:
+            self.code_size = 3
+
+        self.is_pseudo = any(self.op in pop for pop in Code.PSEUDO_OP)
+
+    def to_string(self):
+        return string(self.line_num) + '\t' + '{%01X}'.format(self.offset) + '\t' + self.label + '\t' + self.op + '\t' + self.arg + '\t' + self.x + '\t' + self.obj_code
 
 class Assembler:
 
