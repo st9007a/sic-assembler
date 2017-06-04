@@ -72,11 +72,11 @@ class Assembler:
 
     def write_list_file(self, line):
         with open(self.asm_file_name[:-4] + '.lst', 'a') as f:
-            f.write(line)
+            f.write(line.upper())
 
     def write_obj_file(self, line):
         with open(self.asm_file_name[:-4] + '.obj', 'a') as f:
-            f.write(line)
+            f.write(line.upper())
 
     def pass_1(self):
         global op_table
@@ -135,7 +135,7 @@ class Assembler:
         global op_table
 
         if self.codes[0].op == 'START':
-            self.write_list_file(hex(self.codes[0].loc) + '\t' + self.codes[0].line + '\n')
+            self.write_list_file(hex(self.codes[0].loc)[2:] + '\t' + self.codes[0].line + '\n')
 
         self.write_obj_file('H' + self.program_name.ljust(6) + format(self.start_addr, '06x') + format(self.program_len, '06x') + '\n')
         text_record_head = 'T' + format(self.start_addr, '06x')
