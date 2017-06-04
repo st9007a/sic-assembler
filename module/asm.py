@@ -17,7 +17,7 @@ class Code:
 
         # parse code
         if len(parse_line) == 1:
-            self.op = parse_line(0)
+            self.op = parse_line[0]
 
         elif len(parse_line) == 2:
             self.op = parse_line[0]
@@ -58,14 +58,15 @@ class Assembler:
         self.program_len = 0
 
     def read_asm_file(self, file_name):
-        self.asm_file_name = file.name
+        self.asm_file_name = file_name
         with open(file_name) as f:
             content = [elem.rstrip('\n') for elem in f.readlines() if elem.rstrip('\n') != '']
             for line in content:
                 self.codes.append(Code(line))
 
-    def wirte_inter_file(self, line):
-        with open(self.asm_file_name[:-4] + '.loc', 'w+') as f:
+    def write_inter_file(self, line):
+        print self.asm_file_name[:-4] + '.loc'
+        with open(self.asm_file_name[:-4] + '.loc', 'a') as f:
             f.write(line)
 
     def pass_1(self):
@@ -85,12 +86,12 @@ class Assembler:
             #! check comment line
 
             if code.label != None:
-                if self.symtab[code.label] != None:
+                if code.label in self.symtab != None:
                     raise Exception('Error: duplicate symbol.')
                 else:
                     self.symtab[code.label] = self.locctr
 
-            if op_table.op_to_code[code.op] != None:
+            if op_table.is_op_exist(code.op):
                 self.locctr = self.locctr + 3
             elif code.op == 'WORD':
                 self.locctr = self.locctr + 3

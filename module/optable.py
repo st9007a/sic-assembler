@@ -72,7 +72,10 @@ class OpTable:
             self.code_to_op[OpTable.op_codes[elem]] = elem
 
     def is_exist(self, op):
-        return True if  op in [elem for elem in OpTable.op_codes] or op in OpTable.pseudo_op_codes else False
+        return True if op in OpTable.op_codes or op in OpTable.pseudo_op_codes else False
+
+    def is_op_exist(self, op):
+        return True if op in OpTable.op_codes else False
 
     def is_pseudo_op_exist(self, op):
         return True if op in OpTable.pseudo_op_codes else False
