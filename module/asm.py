@@ -32,19 +32,19 @@ class Code:
             self.arg = parse_line[2]
 
         else:
-            raise Exception('Error line: ' + line)
+            raise Exception('line: ' + line)
 
         # check op is exist
         if op_table.is_exist(self.op) == False:
-            raise Exception('Error op: ' + self.op)
+            raise Exception('invalid op: ' + self.op)
 
         # check label with pseudo op
         if self.label != None and op_table.is_pseudo_op_exist(self.op) == False:
-            raise Exception('Error line: ' + line)
+            raise Exception('line: ' + line)
 
         # check if mssing label when pseudo op
         if self.label == None and op_table.is_pseudo_op_exist(self.op):
-            raise Exception('Error: label not found')
+            raise Exception('label not found')
 
 
 class Assembler:
@@ -96,7 +96,7 @@ class Assembler:
 
             if code.label != None:
                 if code.label in self.symtab != None:
-                    raise Exception('Error: duplicate symbol.')
+                    raise Exception('duplicate symbol')
                 else:
                     self.symtab[code.label] = self.locctr
 
@@ -115,12 +115,12 @@ class Assembler:
                 elif code.arg[0] == 'X':
                     length = len(code.arg[2:-1]) / 2
                 else:
-                    raise Exception('Error Byte Symbol: ' + code.arg[0])
+                    raise Exception('invalid byte symbol: ' + code.arg[0])
 
                 self.locctr = self.locctr + length
 
             else:
-                raise Exception('Error: invalid op code')
+                raise Exception('invalid op code')
 
             code.loc = self.locctr
 
@@ -167,6 +167,9 @@ class Assembler:
 if __name__ == '__main__':
     if os.path.isfile('../test/test.lst'):
         os.remove('../test/test.lst')
+
+    if os.path.isfile('../test/test.obj'):
+        os.remove('../test/test.obj')
 
     asm = Assembler()
     asm.load('../test/test.asm')
