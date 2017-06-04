@@ -60,13 +60,9 @@ class OpTable:
         'TIXR': 'B8',
         'WD': 'DC',
 
-        'RESB': 'RESB',
-        'RESW': 'RESW',
-        'BYTE': 'BYTE',
-        'WORD': 'WORD',
-        'START': 'START',
-        'END': 'END',
     }
+
+    pseudo_op_codes = [ 'RESB', 'RESW', 'BYTE', 'WORD', 'START', 'END' ]
 
     def __init__(self):
         self.op_to_code = {}
@@ -74,10 +70,12 @@ class OpTable:
         for elem in OpTable.op_codes:
             self.op_to_code[elem] = OpTable.op_codes[elem]
             self.code_to_op[OpTable.op_codes[elem]] = elem
-        print self.op_to_code
-        print self.code_to_op
 
+    def is_exist(self, op):
+        return True if  op in [elem for elem in OpTable.op_codes] or op in OpTable.pseudo_op_codes else False
 
+    def is_pseudo_op_exist(self, op):
+        return True if op in OpTable.pseudo_op_codes else False
 
 if __name__ == '__main__':
     op_table = OpTable()
