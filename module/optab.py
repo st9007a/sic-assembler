@@ -50,7 +50,7 @@ class OpTable:
         'STSW': 'e8',
         'STT': '84',
         'STX': '10',
-        'SUB': '1C',
+        'SUB': '1c',
         'SUBF': '5c',
         'SUBR': '94',
         'SVC': 'b0',
