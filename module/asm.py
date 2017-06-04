@@ -143,7 +143,7 @@ class Assembler:
         record_len = 0
 
         for code in self.codes:
-            if code.op == 'START':
+            if code.op == 'START' or code.op in ['RESW', 'RESB']:
                 continue
             if code.op == 'END':
                 break
@@ -182,7 +182,7 @@ class Assembler:
 
         self.write_obj_file(text_record_head + format(record_len, '06x') + text_record_body + '\n')
         for code in self.codes:
-            if op_table.is_pseudo_op_exist(code.op):
+            if op_table.is_pseudo_op_exist(code.op) and code.op != 'START':
                 continue
 
             self.write_obj_file('E' + format(code.loc, '06x'))
