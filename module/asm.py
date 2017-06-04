@@ -1,4 +1,5 @@
-from optable import OpTable
+import os
+from optab import OpTable
 
 global op_table
 op_table = OpTable()
@@ -11,6 +12,8 @@ class Code:
         self.label = None
         self.op = None
         self.arg = None
+        self.loc = None
+        self.obj_code = None
         self.line = line.strip('\t').strip('\n')
 
         parse_line = self.line.split('\t')
@@ -56,17 +59,21 @@ class Assembler:
         self.locctr = 0x0
         self.start_addr = 0
         self.program_len = 0
+        self.program_name = ''
 
-    def read_asm_file(self, file_name):
+    def load(self, file_name):
         self.asm_file_name = file_name
         with open(file_name) as f:
             content = [elem.rstrip('\n') for elem in f.readlines() if elem.rstrip('\n') != '']
             for line in content:
                 self.codes.append(Code(line))
 
-    def write_inter_file(self, line):
-        print self.asm_file_name[:-4] + '.loc'
-        with open(self.asm_file_name[:-4] + '.loc', 'a') as f:
+    def write_list_file(self, line):
+        with open(self.asm_file_name[:-4] + '.lst', 'a') as f:
+            f.write(line)
+
+    def write_obj_file(self, line):
+        with open(self.asm_file_name[:-4] + '.obj', 'a') as f:
             f.write(line)
 
     def pass_1(self):
@@ -74,12 +81,14 @@ class Assembler:
 
         if self.codes[0].op == 'START':
             self.locctr = int(self.codes[0].arg, 16)
-            self.write_inter_file(hex(self.locctr)[2:] + '\t' + self.codes[0].line + '\n')
-            self.codes = self.codes[1:]
+            self.codes[0].loc = self.locctr
+            self.program_name = self.codes[0].label
 
         self.start_addr = self.locctr
 
         for code in self.codes:
+            if code.op == 'START':
+                continue
             if code.op == 'END':
                 break
 
@@ -113,16 +122,54 @@ class Assembler:
             else:
                 raise Exception('Error: invalid op code')
 
-            self.write_inter_file(hex(self.locctr)[2:] + '\t' + code.line + '\n')
+            code.loc = self.locctr
 
         if self.codes[len(self.codes) - 1].op == 'END':
-            self.write_inter_file(hex(self.locctr)[2:] + '\t' + self.codes[len(self.codes) - 1].line + '\n')
+            code.loc = self.locctr
 
         self.program_len = self.locctr - self.start_addr
 
+    def pass_2(self):
+        global op_table
+
+        if self.codes[0].op == 'START':
+            self.write_list_file(hex(self.codes[0].loc) + '\t' + self.codes[0].line)
+
+        self.write_obj_file('H' + self.program_name.ljust(6) + format(self.start_addr, '06x') + format(self.program_len, '06x'))
+
+        for code in self.codes:
+            if code.op == 'START':
+                continue
+            if code.op == 'END':
+                break
+
+            #! check comment line
+
+            if op_table.is_op_exist(code.op):
+                op_addr = 0
+                if code.arg != None:
+                    if code.arg in self.symtab:
+                        op_addr = format(self.symtab[code.arg], '04x')
+                    else:
+                        raise Exception('undefined symbol ' + code.arg)
+                op_code = op_table.op_to_code[code.op]
+                code.obj_code = op_code + op_addr
+            elif code.op == 'BYTE':
+                if code.arg[0] == 'C':
+                    code.obj_code = code.arg[2:-1].encode('hex')
+                elif code.arg[0] == 'X':
+                    code.obj_code = code.arg[2:-1]
+                else:
+                    raise Exception('error arg: ' + code.arg)
+            elif code.op == 'WORD':
+                code.obj_code = format(int(code.arg), '06x')
 
 if __name__ == '__main__':
+    if os.path.isfile('../test/test.lst'):
+        os.remove('../test/test.lst')
+
     asm = Assembler()
-    asm.read_asm_file('../test/test.asm')
+    asm.load('../test/test.asm')
     asm.pass_1()
+    asm.pass_2()
 
