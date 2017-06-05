@@ -46,7 +46,6 @@ class Code:
         if self.label == None and op_table.is_pseudo_op_exist(self.op):
             raise Exception('label not found')
 
-
 class Assembler:
 
     max_record_len = 30
