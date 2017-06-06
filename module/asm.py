@@ -66,6 +66,16 @@ class Assembler:
                     continue
                 self.codes.append(Code(line))
 
+    def get_op_addr(self, arg):
+        if arg in self.symtab:
+            return format(self.symtab[arg], '04x')
+        elif arg[0] == '#':
+            return format(int(arg[1:]), '04x')
+        elif arg in ['A', 'S', 'X', 'T']:
+            return OpTable.registers[arg]
+        else:
+            raise Exception('undefined symbol ' + arg)
+
     def write_list_file(self, line):
         with open(self.asm_file_name[:-4] + '.lst', 'a') as f:
             f.write(line.upper())
@@ -143,16 +153,7 @@ class Assembler:
                 continue
 
             if op_table.is_op_exist(code.op):
-                op_addr = 0
-                if code.arg != None:
-                    if code.arg in self.symtab:
-                        op_addr = format(self.symtab[code.arg], '04x')
-                    elif code.arg[0] == '#':
-                        op_addr = format(int(code.arg[1:]), '04x')
-                    elif code.arg in ['A', 'S', 'X', 'T']:
-                        op_addr = OpTable.registers[code.arg]
-                    else:
-                        raise Exception('undefined symbol ' + code.arg)
+                op_addr = self.get_op_addr(code.arg) if code.arg != None else 0
                 op_code = op_table.op_to_code[code.op]
                 code.obj_code = op_code + op_addr
             elif code.op == 'BYTE':
