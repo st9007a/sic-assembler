@@ -96,6 +96,8 @@ class Assembler:
                 else:
                     self.symtab[code.label] = self.locctr
 
+            code.loc = self.locctr
+
             if op_table.is_op_exist(code.op):
                 self.locctr = self.locctr + 3
             elif code.op == 'WORD':
@@ -118,10 +120,9 @@ class Assembler:
             else:
                 raise Exception('invalid op code')
 
-            code.loc = self.locctr
 
-        if self.codes[len(self.codes) - 1].op == 'END':
-            code.loc = self.locctr
+        # if self.codes[len(self.codes) - 1].op == 'END':
+        #     code.loc = self.locctr
 
         self.program_len = self.locctr - self.start_addr
 
@@ -142,7 +143,7 @@ class Assembler:
             if code.op == 'END':
                 break
             if code.op in ['RESW', 'RESB']:
-                self.write_list_file('\t' + code.line + '\n')
+                self.write_list_file(hex(code.loc)[2:] + '\t' + code.line + '\n')
                 continue
 
             if op_table.is_op_exist(code.op):
