@@ -55,6 +55,9 @@ class Assembler:
         self.program_name = ''
 
     def load(self, file_name):
+        if file_name[-3:].lower() != 'asm':
+            raise Exception('extension file name is not "asm"')
+
         self.asm_file_name = file_name
         with open(file_name) as f:
             content = [elem.rstrip('\n') for elem in f.readlines() if elem.rstrip('\n') != '']
@@ -128,8 +131,8 @@ class Assembler:
         if self.codes[0].op == 'START':
             self.write_list_file(hex(self.codes[0].loc)[2:] + '\t' + self.codes[0].line + '\n')
 
-        self.write_obj_file('H' + self.program_name.ljust(6) + format(self.start_addr, '06x') + format(self.program_len, '06x') + '\n')
-        text_record_head = 'T' + format(self.start_addr, '06x')
+        self.write_obj_file('H^' + self.program_name.ljust(6) + '^' + format(self.start_addr, '06x') + '^' + format(self.program_len, '06x') + '\n')
+        text_record_head = 'T' + '^' + format(self.start_addr, '06x')
         text_record_body = ''
         record_len = 0
 
@@ -162,22 +165,22 @@ class Assembler:
                 code.obj_code = format(int(code.arg), '06x')
 
             if record_len + len(code.obj_code) / 2 > Assembler.max_record_len:
-                self.write_obj_file(text_record_head + format(record_len, '06x') + text_record_body + '\n')
-                text_record_head = 'T' + format(code.loc, '06x')
+                self.write_obj_file(text_record_head + '^' + format(record_len, '02x') + text_record_body + '\n')
+                text_record_head = 'T' + '^' + format(code.loc, '06x')
                 text_record_body = ''
                 record_len = 0
 
-            text_record_body = text_record_body + code.obj_code
+            text_record_body = text_record_body + '^' +code.obj_code
             record_len = record_len + len(code.obj_code) / 2
 
             self.write_list_file(hex(code.loc)[2:] + '\t' + code.line + '\t' + code.obj_code + '\n')
 
-        self.write_obj_file(text_record_head + format(record_len, '06x') + text_record_body + '\n')
+        self.write_obj_file(text_record_head + '^' + format(record_len, '02x') + text_record_body + '\n')
         for code in self.codes:
             if op_table.is_pseudo_op_exist(code.op) and code.op != 'START':
                 continue
 
-            self.write_obj_file('E' + format(code.loc, '06x'))
+            self.write_obj_file('E^' + format(code.loc, '06x'))
             break
 
         if self.codes[len(self.codes) - 1].op == 'END':
