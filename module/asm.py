@@ -14,36 +14,28 @@ class Code:
         self.arg = None
         self.loc = None
         self.obj_code = None
-        self.line = line.strip('\t').strip('\n')
+        self.line = line.strip('\n')
 
         parse_line = self.line.split('\t')
 
         # parse code
-        if len(parse_line) == 1:
-            self.op = parse_line[0]
-
-        elif len(parse_line) == 2:
-            self.op = parse_line[0]
-            self.arg = parse_line[1]
+        if len(parse_line) == 2:
+            self.label = parse_line[0] if parse_line[0] != '' else None
+            self.op = parse_line[1]
 
         elif len(parse_line) == 3:
-            self.label = parse_line[0]
+            self.label = parse_line[0] if parse_line[0] != '' else None
             self.op = parse_line[1]
-            self.arg = parse_line[2]
+            self.arg = parse_line[2] if parse_line[2] != '' else None
 
         else:
             raise Exception('line: ' + line)
 
         # check op is exist
         if op_table.is_exist(self.op) == False:
-            raise Exception('invalid op: ' + self.op)
+            raise Exception('invalid op "' + self.op + '"')
 
-        # check label with pseudo op
-        if self.label != None and op_table.is_pseudo_op_exist(self.op) == False:
-            raise Exception('line: ' + line)
-
-        # check if mssing label when pseudo op
-        if self.label == None and op_table.is_pseudo_op_exist(self.op):
+        if self.label == None and self.op in ['RESW','RESB','WORD','BYTE']:
             raise Exception('label not found')
 
 class Assembler:
