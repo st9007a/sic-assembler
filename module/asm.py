@@ -76,13 +76,15 @@ class Assembler:
         else:
             raise Exception('undefined symbol ' + arg)
 
-    def write_list_file(self, line):
-        with open(self.asm_file_name[:-4] + '.lst', 'a') as f:
-            f.write(line.upper())
-
     def write_obj_file(self, line):
         with open(self.asm_file_name[:-4] + '.obj', 'a') as f:
             f.write(line.upper())
+
+    def write_list_file(self, code):
+        with open(self.asm_file_name[:-4] + '.lst', 'a') as f:
+            loc = hex(code.loc)[2:].upper() if code.loc != None else ''
+            obj_code = code.obj_code.upper() if code.obj_code != None else ''
+            f.write(loc + '\t' + obj_code + '\t' + code.line + '\n')
 
     def pass_1(self):
         global op_table
@@ -136,10 +138,10 @@ class Assembler:
         global op_table
 
         if self.codes[0].op == 'START':
-            self.write_list_file(hex(self.codes[0].loc)[2:] + '\t' + self.codes[0].line + '\n')
+            self.write_list_file(self.codes[0])
 
-        self.write_obj_file('H^' + self.program_name.ljust(6) + '^' + format(self.start_addr, '06x') + '^' + format(self.program_len, '06x') + '\n')
-        text_record_head = 'T' + '^' + format(self.start_addr, '06x')
+        self.write_obj_file('H' + self.program_name.ljust(6) + format(self.start_addr, '06x') + format(self.program_len, '06x') + '\n')
+        text_record_head = 'T' + format(self.start_addr, '06x')
         text_record_body = ''
         record_len = 0
 
@@ -149,7 +151,7 @@ class Assembler:
             if code.op == 'END':
                 break
             if code.op in ['RESW', 'RESB']:
-                self.write_list_file(hex(code.loc)[2:] + '\t' + code.line + '\n')
+                self.write_list_file(code)
                 continue
 
             if op_table.is_op_exist(code.op):
@@ -167,29 +169,29 @@ class Assembler:
                 code.obj_code = format(int(code.arg), '06x')
 
             if record_len + len(code.obj_code) / 2 > Assembler.max_record_len:
-                self.write_obj_file(text_record_head + '^' + format(record_len, '02x') + text_record_body + '\n')
-                text_record_head = 'T' + '^' + format(code.loc, '06x')
+                self.write_obj_file(text_record_head + format(record_len, '02x') + text_record_body + '\n')
+                text_record_head = 'T' + format(code.loc, '06x')
                 text_record_body = ''
                 record_len = 0
 
-            text_record_body = text_record_body + '^' +code.obj_code
+            text_record_body = text_record_body +code.obj_code
             record_len = record_len + len(code.obj_code) / 2
 
-            self.write_list_file(hex(code.loc)[2:] + '\t' + code.line + '\t' + code.obj_code + '\n')
+            self.write_list_file(code)
 
-        self.write_obj_file(text_record_head + '^' + format(record_len, '02x') + text_record_body + '\n')
+        self.write_obj_file(text_record_head + format(record_len, '02x') + text_record_body + '\n')
 
         # write end record to obj file
         for code in self.codes:
             if op_table.is_pseudo_op_exist(code.op) and code.op != 'START':
                 continue
 
-            self.write_obj_file('E^' + format(code.loc, '06x'))
+            self.write_obj_file('E' + format(code.loc, '06x'))
             break
 
         # write end to list file
         if self.codes[len(self.codes) - 1].op == 'END':
-            self.write_list_file('\t' + self.codes[len(self.codes) - 1].line)
+            self.write_list_file(self.codes[len(self.codes) - 1])
 
 
 if __name__ == '__main__':
