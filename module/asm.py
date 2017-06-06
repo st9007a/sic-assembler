@@ -49,7 +49,7 @@ class Assembler:
         self.codes = []
 
         self.symtab= {}
-        self.locctr = 0x0
+        self.locctr = 0
         self.start_addr = 0
         self.program_len = 0
         self.program_name = ''
@@ -134,10 +134,13 @@ class Assembler:
         record_len = 0
 
         for code in self.codes:
-            if code.op == 'START' or code.op in ['RESW', 'RESB']:
+            if code.op == 'START':
                 continue
             if code.op == 'END':
                 break
+            if code.op in ['RESW', 'RESB']:
+                self.write_list_file('\t' + code.line + '\n')
+                continue
 
             #! check comment line
 
