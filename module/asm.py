@@ -120,10 +120,6 @@ class Assembler:
             else:
                 raise Exception('invalid op code')
 
-
-        # if self.codes[len(self.codes) - 1].op == 'END':
-        #     code.loc = self.locctr
-
         self.program_len = self.locctr - self.start_addr
 
     def pass_2(self):
@@ -151,6 +147,8 @@ class Assembler:
                 if code.arg != None:
                     if code.arg in self.symtab:
                         op_addr = format(self.symtab[code.arg], '04x')
+                    elif code.arg[0] == '#':
+                        op_addr = format(int(code.arg[1:]), '04x')
                     else:
                         raise Exception('undefined symbol ' + code.arg)
                 op_code = op_table.op_to_code[code.op]
@@ -177,6 +175,8 @@ class Assembler:
             self.write_list_file(hex(code.loc)[2:] + '\t' + code.line + '\t' + code.obj_code + '\n')
 
         self.write_obj_file(text_record_head + '^' + format(record_len, '02x') + text_record_body + '\n')
+
+        # write end record to obj file
         for code in self.codes:
             if op_table.is_pseudo_op_exist(code.op) and code.op != 'START':
                 continue
@@ -184,6 +184,7 @@ class Assembler:
             self.write_obj_file('E^' + format(code.loc, '06x'))
             break
 
+        # write end to list file
         if self.codes[len(self.codes) - 1].op == 'END':
             self.write_list_file('\t' + self.codes[len(self.codes) - 1].line)
 
