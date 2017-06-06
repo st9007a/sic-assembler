@@ -59,6 +59,8 @@ class Assembler:
         with open(file_name) as f:
             content = [elem.rstrip('\n') for elem in f.readlines() if elem.rstrip('\n') != '']
             for line in content:
+                if line.strip('\t').strip(' ')[0] == '.':
+                    continue
                 self.codes.append(Code(line))
 
     def write_list_file(self, line):
@@ -84,8 +86,6 @@ class Assembler:
                 continue
             if code.op == 'END':
                 break
-
-            #! check comment line
 
             if code.label != None:
                 if code.label in self.symtab != None:
@@ -141,8 +141,6 @@ class Assembler:
             if code.op in ['RESW', 'RESB']:
                 self.write_list_file('\t' + code.line + '\n')
                 continue
-
-            #! check comment line
 
             if op_table.is_op_exist(code.op):
                 op_addr = 0
