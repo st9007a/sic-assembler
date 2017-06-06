@@ -38,10 +38,16 @@ class OpTable:
         'TD': 'e0',
         'TIX': '2c',
         'WD': 'dc',
-
     }
 
     pseudo_op_codes = [ 'RESB', 'RESW', 'BYTE', 'WORD', 'START', 'END' ]
+
+    registers = {
+        'A': '00',
+        'S': '40',
+        'T': '50',
+        'X': '10',
+    }
 
     def __init__(self):
         self.op_to_code = {}

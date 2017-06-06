@@ -149,6 +149,8 @@ class Assembler:
                         op_addr = format(self.symtab[code.arg], '04x')
                     elif code.arg[0] == '#':
                         op_addr = format(int(code.arg[1:]), '04x')
+                    elif code.arg in ['A', 'S', 'X', 'T']:
+                        op_addr = OpTable.registers[code.arg]
                     else:
                         raise Exception('undefined symbol ' + code.arg)
                 op_code = op_table.op_to_code[code.op]
