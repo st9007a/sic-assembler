@@ -195,14 +195,14 @@ class Assembler:
 
 
 if __name__ == '__main__':
-    if os.path.isfile('../test/test.lst'):
-        os.remove('../test/test.lst')
+    if os.path.isfile('./test/test.lst'):
+        os.remove('./test/test.lst')
 
-    if os.path.isfile('../test/test.obj'):
-        os.remove('../test/test.obj')
+    if os.path.isfile('./test/test.obj'):
+        os.remove('./test/test.obj')
 
     asm = Assembler()
-    asm.load('../test/test.asm')
+    asm.load('./test/test.asm')
     asm.pass_1()
     asm.pass_2()
 
